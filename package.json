@@ -6,9 +6,10 @@
     "node": ">=20 <25"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "check:node": "node scripts/check-node.js",
+    "dev": "npm run check:node && next dev",
+    "build": "npm run check:node && next build",
+    "start": "npm run check:node && next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },

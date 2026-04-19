@@ -49,6 +49,8 @@ node -v
 
 Use Node `22.x` or `20.x` for this project. Node `25` is not recommended here and can break Next.js dev mode.
 
+The project also includes a runtime guard, so `npm run dev` and `npm run build` will stop immediately with a clear error if launched under an unsupported Node version.
+
 1. Install dependencies
 
 ```bash
