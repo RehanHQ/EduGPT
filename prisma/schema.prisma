@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  createdAt    DateTime      @default(now())
+  sessions     ChatSession[]
+  documents    StudyDocument[]
+}
+
+model ChatSession {
+  id           String        @id @default(cuid())
+  title        String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages     ChatMessage[]
+}
+
+model ChatMessage {
+  id           String        @id @default(cuid())
+  role         String
+  content      String
+  createdAt    DateTime      @default(now())
+  sessionId    String
+  session      ChatSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model StudyDocument {
+  id           String          @id @default(cuid())
+  title        String
+  subject      String
+  fileName     String
+  mimeType     String
+  storageUrl   String?
+  summary      String
+  content      String
+  createdAt    DateTime        @default(now())
+  ownerId      String
+  owner        User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  chunks       DocumentChunk[]
+}
+
+model DocumentChunk {
+  id           String          @id @default(cuid())
+  chunkIndex   Int
+  content      String
+  embedding    Unsupported("vector")
+  documentId   String
+  document     StudyDocument   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
