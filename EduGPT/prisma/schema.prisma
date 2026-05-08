@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String        @id @default(cuid())
+  email          String        @unique
+  role           String        @default("STUDENT")
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  sessions       ChatSession[]
+  messages       ChatMessage[]
+  documents      Document[]
+  traces         Trace[]
+}
+
+model Organization {
+  id        String     @id @default(cuid())
+  name      String
+  domain    String     @unique
+  createdAt DateTime   @default(now())
+  users     User[]
+  documents Document[]
+  sessions  ChatSession[]
+}
+
+model Document {
+  id             String        @id @default(cuid())
+  title          String
+  subject        String
+  fileName       String
+  mimeType       String
+  summary        String
+  content        String
+  metadata       String        @default("{}")
+  uploadedById   String
+  organizationId String
+  createdAt      DateTime      @default(now())
+  uploadedBy     User          @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chunks         DocumentChunk[]
+}
+
+model DocumentChunk {
+  id             String       @id
+  chunkIndex     Int
+  content        String
+  embedding      String
+  sectionTitle   String?
+  pageNumber     Int?
+  tokenEstimate  Int?
+  documentId     String
+  organizationId String
+  document       Document     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([documentId])
+}
+
+model ChatSession {
+  id             String        @id @default(cuid())
+  title          String
+  userId         String
+  organizationId String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  messages       ChatMessage[]
+}
+
+model ChatMessage {
+  id                 String      @id @default(cuid())
+  userId             String
+  sessionId          String
+  role               String
+  content            String
+  structuredResponse String?
+  sources            String?
+  difficulty         String?
+  traceId            String?
+  createdAt          DateTime    @default(now())
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session            ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
+model Trace {
+  id        String   @id @default(cuid())
+  userId    String?
+  trace_id  String   @unique
+  payload   String
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
