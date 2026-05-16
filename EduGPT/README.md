@@ -97,6 +97,41 @@ npm run dev
 
 7. Open `http://localhost:3000`
 
+## Vercel Deployment Status
+
+EduGPT is not ready for a reliable Vercel production deployment as-is. The Next.js build is deployable, but the current runtime still depends on local persistence that does not fit Vercel serverless hosting:
+
+- Prisma is configured for SQLite through `DATABASE_URL=file:./dev.db`.
+- Trace data is written to local files.
+- The older local document index uses `.data/documents.json`.
+
+Before deploying to Vercel, replace local persistence with hosted services:
+
+1. Move Prisma from SQLite to a hosted database such as Vercel Postgres, Neon, Supabase, or another managed PostgreSQL provider.
+2. Update `prisma/schema.prisma` to use the production database provider and run the required migration.
+3. Replace file-backed trace and document storage with database tables or object storage.
+4. Add the required Vercel environment variables:
+
+```bash
+DATABASE_URL=your_hosted_database_url
+AI_PROVIDER=groq
+AI_MODEL=llama-3.3-70b-versatile
+GROQ_API_KEY=your_groq_api_key
+GROQ_BASE_URL=https://api.groq.com/openai/v1
+ADMIN_EMAILS=admin@example.edu
+TEACHER_EMAILS=teacher@example.edu
+```
+
+After those persistence changes are complete, use these Vercel settings:
+
+```text
+Framework Preset: Next.js
+Install Command: npm install
+Build Command: npm run build
+Output Directory: .next
+Node.js Version: 22.x
+```
+
 ## MVP Behavior
 
 - If no study material is uploaded, EduGPT answers directly from the configured model.
