@@ -74,6 +74,8 @@ OLLAMA_BASE_URL=http://127.0.0.1:11434
 
 If you want OpenAI instead, switch `AI_PROVIDER=openai` and add `OPENAI_API_KEY`.
 
+If you want Groq instead, switch `AI_PROVIDER=groq`, set `AI_MODEL=llama-3.3-70b-versatile`, and add `GROQ_API_KEY`.
+
 4. Install the local models
 
 ```bash

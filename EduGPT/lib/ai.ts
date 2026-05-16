@@ -1,7 +1,8 @@
 import OpenAI from "openai";
-import { config, requireOpenAIApiKey } from "@/lib/config";
+import { config, requireGroqApiKey, requireOpenAIApiKey } from "@/lib/config";
 
 let openAIClient: OpenAI | null = null;
+let groqClient: OpenAI | null = null;
 
 function getOpenAIClient() {
   if (!openAIClient) {
@@ -13,8 +14,23 @@ function getOpenAIClient() {
   return openAIClient;
 }
 
+function getGroqClient() {
+  if (!groqClient) {
+    groqClient = new OpenAI({
+      apiKey: requireGroqApiKey(),
+      baseURL: config.groqBaseUrl
+    });
+  }
+
+  return groqClient;
+}
+
 function getOllamaUrl(path: string) {
   return `${config.ollamaBaseUrl.replace(/\/+$/, "")}${path}`;
+}
+
+function isGroqProvider() {
+  return config.provider === "groq" || config.provider === "grok";
 }
 
 function deterministicEmbedding(text: string, dimensions = 256) {
@@ -47,6 +63,22 @@ export async function generateTutorReply(
     });
 
     return completion.output_text?.trim() ?? "";
+  }
+
+  if (isGroqProvider()) {
+    const client = getGroqClient();
+    const completion = await client.chat.completions.create({
+      model: config.model,
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt
+        },
+        ...messages
+      ]
+    });
+
+    return completion.choices[0]?.message?.content?.trim() ?? "";
   }
 
   if (config.provider === "ollama") {

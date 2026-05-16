@@ -21,7 +21,10 @@ export function redactSensitiveText(value: string | null): string | null {
 
   return value
     .replace(/sk-[A-Za-z0-9_-]+/g, "[REDACTED]")
+    .replace(/gsk_[A-Za-z0-9_-]+/g, "[REDACTED]")
     .replace(/(OPENAI_API_KEY\s*=\s*)\S+/gi, "$1[REDACTED]")
+    .replace(/(GROQ_API_KEY\s*=\s*)\S+/gi, "$1[REDACTED]")
+    .replace(/(GROK_API_KEY\s*=\s*)\S+/gi, "$1[REDACTED]")
     .replace(/(api[_-]?key["']?\s*[:=]\s*["']?)[^"'\s]+/gi, "$1[REDACTED]");
 }
 
